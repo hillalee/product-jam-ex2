@@ -1,14 +1,12 @@
 import { useState, type FormEvent } from "react";
 import { Navigate, useLocation } from "react-router";
-import { Button, Card, Field, Input, Separator } from "../../components";
+import { Button, Card, Field, Input } from "../../components";
 import { useAuth } from "../../lib/auth";
 import { SUPABASE_ENABLED } from "../../lib/config";
 import styles from "./SignInPage.module.css";
 
-/** The login screen. Two ways in: Google, or an email and password. */
 export default function SignInPage() {
-  const { user, signInWithPassword, signUpWithPassword, signInWithGoogle } =
-    useAuth();
+  const { user, signInWithPassword, signUpWithPassword } = useAuth();
   const location = useLocation();
 
   const [email, setEmail] = useState("");
@@ -21,12 +19,8 @@ export default function SignInPage() {
     return (
       <main className={styles.page}>
         <Card variant="raised" padding="lg">
-          <h1>Supabase is not set up yet</h1>
-          <p>
-            Copy <code>.env.example</code> to <code>.env</code> and fill in the
-            values. The instructions are in{" "}
-            <code>docs/02-supabase-setup.md</code>.
-          </p>
+          <h1>Sign-in is unavailable</h1>
+          <p>Please try again later.</p>
         </Card>
       </main>
     );
@@ -61,21 +55,6 @@ export default function SignInPage() {
     <main className={styles.page}>
       <Card variant="raised" padding="lg">
         <h1 className={styles.title}>Log In</h1>
-
-        <Button
-          variant="secondary"
-          className={styles.fullWidth}
-          disabled={busy}
-          onClick={() => void run(signInWithGoogle)}
-        >
-          Continue with Google
-        </Button>
-
-        <div className={styles.divider}>
-          <Separator />
-          <span>or</span>
-          <Separator />
-        </div>
 
         <form onSubmit={handleSubmit}>
           <Field label="Email">

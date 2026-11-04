@@ -106,3 +106,24 @@ leaves it reserved.
 I chose a shared cache because generating the same explanation for each user
 would waste Gemini calls. A bad answer would also be shared, so the server gets
 the text from NASA and checks the output before saving it.
+
+## What changed and why
+
+NASA's updated gateway returned its generic logo for real APOD dates, so I use
+NASA's [documented dated feed](https://api.nasa.gov/assets/files/apod/APOD-APIs-and-RSS-info.pdf)
+when that happens. I still get the random dates from the assignment's endpoint
+and check the requested date against the replacement. The new feed includes
+HTML and uses `hdurl` for the image, so I extract plain text and display the
+image URL rather than rendering its HTML. Missing migrated entries are skipped
+in random batches, so one missing date does not discard the available pictures.
+
+The random-count request was too slow for a full batch, so the page asks for
+six pictures and NASA has 30 seconds instead of 10. The API still accepts a
+count up to 20. Gemini uses `gemini-3.8-flash`, with the same 30-second timeout
+as planned.
+
+
+A phone screenshot showed that the replacement feed can also return a generic
+NASA thumbnail. I now reject those replacement URLs as well. The page loads its
+six images immediately and shows the kit's Spinner until each image finishes,
+with a message if it fails, so the user does not see unexplained empty space.

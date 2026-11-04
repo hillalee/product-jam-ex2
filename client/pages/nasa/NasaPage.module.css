@@ -1,0 +1,77 @@
+.page {
+  max-inline-size: var(--content-width);
+  margin-inline: auto;
+  padding: var(--space-8) var(--space-4);
+}
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  margin-block-end: var(--space-6);
+}
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 24rem), 1fr));
+  gap: var(--space-6);
+  align-items: start;
+}
+.card {
+  overflow: hidden;
+  padding: 0;
+}
+.image {
+  inline-size: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: contain;
+  display: block;
+}
+.imageFrame {
+  position: relative;
+}
+.imageLoading {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+}
+.imageMissing {
+  padding: var(--space-6);
+  color: var(--color-text-muted);
+}
+.text {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-6);
+  overflow-wrap: anywhere;
+}
+.text time,
+.text small {
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+.text h2 {
+  font-size: var(--text-xl);
+}
+.text p {
+  line-height: 1.6;
+}
+.hebrew {
+  border-block-start: 1px solid var(--color-border);
+  padding-block-start: var(--space-4);
+}
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  list-style: none;
+  padding: 0;
+  margin-block-start: var(--space-3);
+}
+.tags li {
+  background: var(--color-surface-hover);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-sm);
+}

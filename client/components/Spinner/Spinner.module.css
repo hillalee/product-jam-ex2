@@ -37,7 +37,6 @@
   }
 }
 
-/* Visible to screen readers, invisible on screen. */
 .srOnly {
   position: absolute;
   inline-size: 1px;
