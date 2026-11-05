@@ -1,3 +1,298 @@
-.title {
-  font-size: var(--text-3xl);
+@import url("https://fonts.googleapis.com/css2?family=Rubik:wght@400;500&display=swap");
+
+@font-face {
+  font-family: "Lava Pro HL";
+  src: url("/fonts/lava-pro-hl-regular-italic.otf") format("opentype");
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+}
+
+.page {
+  --rose: #d11f43;
+  --rose-light: #ffe4ea;
+  --gray-text: #595959;
+
+  display: grid;
+  max-inline-size: none;
+  padding: 24px 28px 54px;
+  color: #000;
+  background: #fff;
+  font-family: "Rubik", sans-serif;
+  font-size: 12px;
+  line-height: normal;
+}
+
+.page p {
+  margin: 0;
+}
+
+.menuBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-block-end: 8px;
+  border-block-end: 2px solid #000;
+  font-family: "Lava Pro HL", serif;
+  font-size: 23px;
+  font-style: italic;
+}
+
+.menuButton {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+.menu {
+  display: none;
+}
+
+.menuOpen {
+  display: grid;
+  gap: 12px;
+  padding-block: 16px;
+  border-block-end: 2px solid #000;
+}
+
+.menu a,
+.menuOpen a {
+  color: #000;
+  font-size: 15px;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.content {
+  display: grid;
+  gap: 54px;
+  max-inline-size: 55ch;
+  margin-block-start: 32px;
+}
+
+.section {
+  display: grid;
+  gap: 13px;
+  padding: 10px 6px;
+}
+
+.heroTitle,
+.sectionTitle,
+.statement {
+  margin: 0;
+  font-family: "Lava Pro HL", serif;
+  font-style: italic;
+  font-weight: 400;
+  line-height: normal;
+}
+
+.heroTitle {
+  font-size: 28px;
+}
+
+.sectionTitle,
+.statement {
+  font-size: 23px;
+}
+
+.pillButton {
+  justify-self: start;
+  margin-block-start: 10px;
+  padding: 6px 12px;
+  border: 1px solid var(--rose);
+  border-radius: 27px;
+  background: #fff;
+  color: var(--rose);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.filled {
+  background: var(--rose-light);
+}
+
+.team {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.member {
+  display: grid;
+  align-content: start;
+  gap: 2px;
+}
+
+.page .role {
+  margin-block-end: 8px;
+  font-size: 15px;
+}
+
+.itemTitle {
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.smallText {
+  color: var(--gray-text);
+  font-size: 10px;
+}
+
+.backgroundItem {
+  display: grid;
+  gap: 4px;
+  padding: 4px 6px 9px;
+  border-block-end: 0.6px solid #000;
+}
+
+.backgroundItem:last-child {
+  border-block-end: none;
+}
+
+.card {
+  display: grid;
+  gap: 10px;
+  padding: 10px 6px;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 2px 2.5px rgb(0 0 0 / 25%);
+}
+
+.audience {
+  display: grid;
+  gap: 7px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.photos {
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+
+.photo {
+  inline-size: 100%;
+  aspect-ratio: 80 / 106;
+  object-fit: cover;
+}
+
+@media (min-width: 480px) {
+  .page {
+    font-size: 15px;
+  }
+
+  .heroTitle {
+    font-size: 40px;
+  }
+
+  .sectionTitle,
+  .statement {
+    font-size: 28px;
+  }
+
+  .page .role {
+    font-size: 18px;
+  }
+
+  .itemTitle {
+    font-size: 16px;
+  }
+
+  .smallText {
+    font-size: 13px;
+  }
+
+  .pillButton {
+    font-size: 15px;
+  }
+}
+
+@media (min-width: 768px) {
+  .page {
+    grid-template-columns: 220px 1fr;
+    align-items: start;
+    column-gap: 64px;
+    padding: 80px 48px;
+  }
+
+  .menuBar {
+    display: none;
+  }
+
+  .menu,
+  .menuOpen {
+    display: grid;
+    position: sticky;
+    top: 24px;
+    gap: 12px;
+    padding-block: 12px 0;
+    border-block-start: 2px solid #000;
+    border-block-end: none;
+  }
+
+  .content {
+    gap: 96px;
+    margin-block-start: 0;
+  }
+}
+
+@media (min-width: 1024px) {
+  .content {
+    max-inline-size: 110ch;
+  }
+
+  .section {
+    grid-template-columns: 1fr 1fr;
+    column-gap: 48px;
+  }
+
+  .sectionTitle,
+  .team,
+  .photos {
+    grid-column: 1 / -1;
+  }
+
+  .team {
+    column-gap: 48px;
+  }
+
+  .hero {
+    grid-template-columns: none;
+    max-inline-size: 55ch;
+  }
+}
+
+@media (min-width: 1280px) {
+  .page {
+    font-size: 18px;
+  }
+
+  .heroTitle {
+    font-size: 52px;
+  }
+
+  .sectionTitle,
+  .statement {
+    font-size: 34px;
+  }
+
+  .page .role {
+    font-size: 22px;
+  }
+
+  .itemTitle,
+  .pillButton {
+    font-size: 18px;
+  }
+
+  .smallText {
+    font-size: 16px;
+  }
 }
