@@ -1,15 +1,21 @@
 <!doctype html>
-
+<!--
+  lang and dir set the language and text direction for the whole app.
+  For a Hebrew, right-to-left app, change these to lang="he" dir="rtl".
+  (client/lib/config.ts keeps a matching copy for the components that need it.)
+-->
 <html lang="en" dir="ltr">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Exercise 2</title>
+    <title>Product Jam App</title>
 
+    <!-- Icons. The files are in client/public/ - replace them with your own. -->
     <link rel="icon" href="/icons/favicon.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png" />
     <link rel="manifest" href="/manifest.json" />
 
+    <!-- The heading font (--font-titles in client/styles/tokens.css). -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -18,6 +24,7 @@
     />
   </head>
   <body>
+    <!-- React draws the whole app inside this one empty div. -->
     <div id="root"></div>
     <script type="module" src="/main.tsx"></script>
   </body>

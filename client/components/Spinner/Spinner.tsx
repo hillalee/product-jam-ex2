@@ -4,10 +4,17 @@ import styles from "./Spinner.module.css";
 
 export type SpinnerProps = ComponentProps<"span"> & {
   size?: "sm" | "md" | "lg";
-
+  /** Announced to screen readers while it spins. */
   label?: string;
 };
 
+/**
+ * A "working on it" indicator.
+ *
+ * Base UI has no spinner, so this is ours: a bordered circle that rotates.
+ *
+ *     {isPending ? <Spinner /> : <EventList />}
+ */
 export function Spinner({
   size = "md",
   label = "Loading",

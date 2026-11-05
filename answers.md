@@ -31,34 +31,23 @@ body?
 
 **Answer:**
 
-1. When I click Create, `handleSubmit` in `client/features/events/EventForm.tsx`
-   passes the values to `EventNewPage` in
-   `client/pages/events/EventNewPage.tsx`, which calls `createEvent.mutate`
-   through `useCreateEvent` in `client/features/events/hooks.ts`.
-2. The hook calls `api()` in `client/lib/api.ts` to add the login token and send
-   the values as JSON to `POST /api/events`.
-3. The route is registered below `requireAuth` in `server/index.ts`, so the
-   server checks the token before handling the request.
-4. The POST handler in `server/routes/events.ts` uses
-   `validate("json", createEventSchema)` from `server/lib/errors.ts` to check
-   the body against `createEventSchema` in `shared/schemas/events.ts`.
-5. The handler uses `createAdminClient` from `server/lib/supabase.ts` to insert
-   the row into `events`, defined in
-   `supabase/migrations/20260921120000_events.sql`. It takes `owner_id` from
-   `c.get("user").id` because the token has already been checked. Taking it from
-   the body would let someone save an event under another account.
-6. `addImageUrls` adds a link if there is an image, and the handler returns the
-   event with status `201`.
-7. `useCreateEvent` marks the events queries as outdated so `useEvents` fetches
-   the updated list when it is shown again in
-   `client/pages/events/EventsPage.tsx`, though the page first shows a success
-   message and opens the new event's details.
-8. If the title contains only spaces, it becomes empty after `.trim()`, so
-   `.min(1, "Please enter a title")` in `shared/schemas/events.ts`, line 38,
-   rejects it along with empty titles. `validate()` then calls
-   `failValidation()` in `server/lib/errors.ts`, which returns `400` on line 53
-   with `invalid_input` and the title error in `fields.title`, so nothing is
-   saved.
+When the user clicks Create, `handleSubmit` in
+`client/features/events/EventForm.tsx` passes the values to `EventNewPage`,
+which calls `createEvent.mutate` from `useCreateEvent` in
+`client/features/events/hooks.ts`. The hook sends `POST /api/events` with
+`api()` from `client/lib/api.ts`, which adds the login token. On the server,
+`requireAuth` in `server/index.ts` checks the token, and the `POST /` route in
+`server/routes/events.ts` checks the body with
+`validate("json", createEventSchema)`, inserts the row into `events` with
+`createAdminClient` and answers `201`. Back in the browser, `onSuccess` in
+`useCreateEvent` invalidates the events queries, so `useEvents` loads the list
+again.
+
+If the title is only spaces the server answers `400` with `invalid_input`,
+because `.trim()` and `.min(1)` on line 38 of `shared/schemas/events.ts` reject
+it. The server takes `owner_id` from `c.get("user").id`, which comes from the
+checked token. If it took it from the body, anyone could create events in
+someone else's name.
 
 ## 2. The rules
 
@@ -72,15 +61,14 @@ same pure functions?
 
 **Answer:**
 
-X or O wins with three consecutive cells across, down or diagonally. A full
-board without a winner is a draw. A move is invalid if its index is not an
-integer from 0 to 15, its cell is occupied, or the game has already ended.
+A game ends when X or O gets three in a row across, down or diagonally, or in a
+draw when the board is full. A move is wrong if the game is over, if the cell is
+not a whole number from 0 to 15, or if the cell is taken.
 
-The page calls `replayGame([...moves, cell])` from `shared/game/index.ts` to get
-the state after a move. It builds a new board without changing the move list, so
-React state stays unchanged until I replace it. The server replays the same list
-with the same function, so it checks the actual rules rather than trusting a
-result sent by the browser.
+`playMove(game, cell)` in `shared/game/index.ts` returns a new game and doesn't
+change the one it gets. Since the page and the server use the same functions,
+they can't disagree about the rules: the server replays the moves with
+`replayGame` and gets the same result the page showed.
 
 ## 3. Cheating
 
@@ -92,11 +80,11 @@ correct games? Which status code did your server answer, and why that one?
 
 **Answer:**
 
-I sent `POST /api/games` with `{ "moves": [0, 1] }` through Chrome’s Console
-while logged in. It returned `400 invalid_input` because a completed game needs
-at least five moves. The server has to check because anyone can send a request
-without using my page; it also rejects occupied cells, unfinished games, extra
-result fields and moves after a win.
+I sent `{ "moves": [0, 1] }` to `POST /api/games` from the Console, and the
+server answered `400` with `game_not_over`. The server checks the moves itself
+because anyone can send it a request without my page. I chose `400` because the
+request itself is wrong: the user is logged in, so it isn't `401`, and nothing
+failed on the server, so it isn't `500`.
 
 [Server response in Network](screenshots/forged-game-network.jpg).
 
@@ -111,14 +99,14 @@ sure B never gets A's games, and what would B see without it?
 
 **Answer:**
 
-After A saved a game, B's authenticated `GET /api/games` returned `200` with
-`[]`, while A's list included the saved game. The server gets the user from the
-verified token, and `.eq("owner_id", c.get("user").id)` in
-`server/routes/games.ts` limits the query to that account. Without that filter,
-the server key would return everyone's games because it bypasses RLS.
+After A saved a game, B's `GET /api/games` answered `200` with an empty list.
+The server knows who is asking from the login token, and
+`.eq("owner_id", c.get("user").id)` in `server/routes/games.ts` keeps A's games
+out. Without it B would see everyone's games, because the server's key bypasses
+Row Level Security.
 
 [A's saved game](screenshots/game-saved.png),
-[B's empty history and Network response](screenshots/user-b-games-network.jpg).
+[B's empty list and Network response](screenshots/user-b-games-network.jpg).
 
 ## 5. When NASA fails
 
@@ -131,11 +119,11 @@ the right key back when you are done.
 
 **Answer:**
 
-I replaced the local NASA key with a wrong one and restarted the dev server.
-NASA returned `403`, but my server returned `502 provider_error` because its
-upstream service rejected the request; the user was still correctly logged in to
-my app. The page showed a clear error, and I restored the original key and
-restarted the server afterward.
+My server answered `502` with `nasa_error`, and the page showed "NASA is not
+answering right now". NASA answered `403`, but passing it on would tell the
+browser that the user isn't allowed to do something, which isn't true. `502`
+means a server I depend on failed, which is what happened. I put the right key
+back afterwards.
 
 [Page error and Network response](screenshots/nasa-failure-network.jpg).
 
@@ -155,18 +143,16 @@ this, and what doesn't?
 
 **Answer:**
 
-The server fetches the source from NASA because browser text can be changed.
-Otherwise, one user could submit instructions or false information that would be
-saved in the shared cache and shown to everyone. I appended the requested
-instruction to the NASA text for a local Gemini call; it returned `nebula` and
-`star`, and I removed the experiment afterward.
+The server gets the text from NASA because explanations are saved once and shown
+to everyone, so if it took the text from the browser, one user could make Gemini
+write anything for every other user.
 
-The system prompt separates source text from instructions, while structured
-output and Zod restrict the tags and response shape. They cannot prove that the
-summary is accurate or make prompt injection impossible, so this successful test
-is not a guarantee.
+With the line added, Gemini still answered with a normal Hebrew explanation and
+the tags `sun` and `earth`. The tags are protected twice: the structured output
+only allows tags from my list, and Zod checks them again. The title and the
+summary are free text, so nothing stops an injection from changing them.
 
-[Actual Gemini response](screenshots/prompt-injection.png).
+[Gemini's answer](screenshots/prompt-injection.png).
 
 ## 7. When the AI was wrong
 
@@ -175,9 +161,8 @@ was wrong or insecure. How did you notice, and what did you change?
 
 **Answer:**
 
-The first cache-reading code passed the whole database row to the strict Hebrew
-output schema. The row also contained `date` and `status`, so a second request
-returned `500` even though the first explanation had saved correctly. A cache
-regression test and the second-account check caught it. I changed only the
-database-reading validation to strip those extra fields; requests and Gemini
-output still use strict schemas.
+The AI added `.min(5)` to `createGameSchema`, so the schema rejected my 2-move
+game before the server replayed it. I noticed it in question 3, when the server
+answered `invalid_input` instead of a rules error, so I couldn't tell whether
+the replay catches fake games. I removed the rule, and now every game goes
+through `replayGame`, which answers `game_not_over`.

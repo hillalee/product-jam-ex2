@@ -7,16 +7,18 @@ import { AuthProvider, RequireAuth } from "./lib/auth";
 import { DIRECTION, SHOW_DEMOS } from "./lib/config";
 import { Layout } from "./pages/Layout";
 
+// One line per page. Each page is downloaded the first time someone visits
+// it, so adding pages never slows down the rest of the app.
 const HomePage = lazy(() => import("./pages/home/HomePage"));
 const SignInPage = lazy(() => import("./pages/signin/SignInPage"));
 const AuthCallbackPage = lazy(() => import("./pages/auth/AuthCallbackPage"));
 const EventsPage = lazy(() => import("./pages/events/EventsPage"));
-const TicTacToePage = lazy(() => import("./pages/tic-tac-toe/TicTacToePage"));
-const NasaPage = lazy(() => import("./pages/nasa/NasaPage"));
 const EventNewPage = lazy(() => import("./pages/events/EventNewPage"));
 const EventDetailPage = lazy(() => import("./pages/events/EventDetailPage"));
 const EventEditPage = lazy(() => import("./pages/events/EventEditPage"));
 const DesignPage = lazy(() => import("./pages/design/DesignPage"));
+const TicTacToePage = lazy(() => import("./pages/tic-tac-toe/TicTacToePage"));
+const NasaPage = lazy(() => import("./pages/nasa/NasaPage"));
 const ComponentsPage = lazy(() => import("./pages/components/ComponentsPage"));
 const DemosPage = lazy(() => import("./pages/demos/DemosPage"));
 const BlankDemoPage = lazy(() => import("./pages/demos/BlankDemoPage"));
@@ -24,15 +26,27 @@ const ElementsDemoPage = lazy(() => import("./pages/demos/ElementsDemoPage"));
 const VizDemoPage = lazy(() => import("./pages/demos/VizDemoPage"));
 const NotFoundPage = lazy(() => import("./pages/NotFoundPage"));
 
+// Holds the data fetched from the server, so two pages asking for the same
+// thing only cause one request. See client/features/events/ for how it's used.
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
+      // Don't refetch everything the moment the user clicks back into the tab.
       refetchOnWindowFocus: false,
       retry: 1,
     },
   },
 });
 
+/**
+ * The top of the browser app.
+ *
+ * The providers wrap everything, then the router picks a page based on the URL.
+ * To add a page: make a file in client/pages/<section>/ that does
+ * `export default function MyPage()`, add a lazy() line at the top of this
+ * file, then a <Route> below. Put it inside <RequireAuth> if you have to be
+ * logged in to see it.
+ */
 export function App() {
   return (
     <QueryClientProvider client={queryClient}>
@@ -41,6 +55,8 @@ export function App() {
           <ToastProvider>
             <BrowserRouter>
               <AuthProvider>
+                {/* Shows a spinner while a page downloads. Pages inside
+                <Layout> get their own, so the header stays put. */}
                 <Suspense
                   fallback={
                     <main>
@@ -49,16 +65,20 @@ export function App() {
                   }
                 >
                   <Routes>
+                    {/* Full-screen pages, without the header and footer. */}
                     <Route path="/signin" element={<SignInPage />} />
                     <Route
                       path="/auth/callback"
                       element={<AuthCallbackPage />}
                     />
 
+                    {/* Everything in here gets the header and footer from
+                    client/pages/Layout.tsx. */}
                     <Route element={<Layout />}>
                       <Route path="/" element={<HomePage />} />
                       <Route path="/design" element={<DesignPage />} />
 
+                      {/* Everything in here needs a login. */}
                       <Route element={<RequireAuth />}>
                         <Route
                           path="/tic-tac-toe"
@@ -77,6 +97,9 @@ export function App() {
                         />
                       </Route>
 
+                      {/* The component gallery and the demos. Set
+                      VITE_SHOW_DEMOS=false in .env to hide them before
+                      handing the app over. */}
                       {SHOW_DEMOS ? (
                         <>
                           <Route

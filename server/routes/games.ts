@@ -1,40 +1,50 @@
-import { replayGame } from "@shared/game";
+import { InvalidMoveError, replayGame } from "@shared/game";
 import { createGameSchema } from "@shared/schemas/games";
 import { Hono } from "hono";
 import type { AppEnv } from "../env";
 import { fail, validate } from "../lib/errors";
 import { createAdminClient } from "../lib/supabase";
 
-const columns = "id, moves, result, created_at";
+const COLUMNS = "id, result, created_at";
 
 export const games = new Hono<AppEnv>()
   .get("/", async (c) => {
     const { data, error } = await createAdminClient(c.env)
       .from("games")
-      .select(columns)
+      .select(COLUMNS)
       .eq("owner_id", c.get("user").id)
       .order("created_at", { ascending: false });
-    if (error)
+
+    if (error) {
       return fail(c, 500, "database_error", "Could not load your games.");
+    }
     return c.json(data);
   })
+
   .post("/", validate("json", createGameSchema), async (c) => {
     const { moves } = c.req.valid("json");
-    let result;
+
+    let game;
     try {
-      result = replayGame(moves).result;
+      game = replayGame(moves);
     } catch (error) {
-      return fail(c, 400, "invalid_game", (error as Error).message);
+      if (error instanceof InvalidMoveError) {
+        return fail(c, 400, "invalid_move", error.message);
+      }
+      throw error;
     }
-    if (!result)
-      return fail(c, 400, "invalid_game", "The game is not finished.");
+    if (game.result === null) {
+      return fail(c, 400, "game_not_over", "The game is not over yet.");
+    }
 
     const { data, error } = await createAdminClient(c.env)
       .from("games")
-      .insert({ moves, result, owner_id: c.get("user").id })
-      .select(columns)
+      .insert({ moves, result: game.result, owner_id: c.get("user").id })
+      .select(COLUMNS)
       .single();
-    if (error)
-      return fail(c, 500, "database_error", "Could not save this game.");
+
+    if (error) {
+      return fail(c, 500, "database_error", "Could not save the game.");
+    }
     return c.json(data, 201);
   });

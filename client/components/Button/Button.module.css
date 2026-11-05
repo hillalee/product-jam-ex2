@@ -1,3 +1,10 @@
+/*
+  Every value here comes from client/styles/tokens.css.
+  No hard-coded colours, sizes or radii - that is the rule for this folder.
+  Note `padding-inline` and `margin-inline-end` rather than left/right, so
+  the button mirrors correctly in Hebrew and Arabic.
+*/
+
 .button {
   display: inline-flex;
   align-items: center;
@@ -18,6 +25,7 @@
     color var(--duration-fast) var(--ease-out);
 }
 
+/* Keyboard users must always be able to see where they are. */
 .button:focus-visible {
   outline: var(--focus-ring-width) solid var(--color-accent);
   outline-offset: var(--focus-ring-offset);
@@ -29,6 +37,7 @@
   opacity: 0.55;
 }
 
+/* --- Sizes --- */
 .sm {
   padding-block: var(--space-1);
   padding-inline: var(--space-3);
@@ -45,6 +54,7 @@
   font-size: var(--text-lg);
 }
 
+/* --- Variants --- */
 .primary {
   background-color: var(--color-accent);
   color: var(--color-text-on-accent);
@@ -85,4 +95,27 @@
 }
 .danger:active:not(:disabled) {
   background-color: var(--color-danger-hover);
+}
+
+/* --- Loading spinner --- */
+.spinner {
+  inline-size: 1em;
+  block-size: 1em;
+  border: 2px solid currentColor;
+  border-block-start-color: transparent;
+  border-radius: var(--radius-full);
+  animation: spin var(--duration-base) linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Some people get motion sick. Respect their OS setting. */
+@media (prefers-reduced-motion: reduce) {
+  .spinner {
+    animation-duration: 2s;
+  }
 }

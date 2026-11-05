@@ -1,24 +1,27 @@
-import type { CreateGameInput, Game } from "@shared/schemas/games";
+import type { CreateGameInput, SavedGame } from "@shared/schemas/games";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "../../lib/api";
-import { useAuth } from "../../lib/auth";
 
+const GAMES_KEY = ["games"];
+
+/**
+ * Loads the user's saved games, newest first.
+ * Returns the games query.
+ */
 export function useGames() {
-  const { user } = useAuth();
   return useQuery({
-    queryKey: ["games", user?.id],
-    queryFn: () => api<Game[]>("/api/games"),
+    queryKey: GAMES_KEY,
+    queryFn: () => api<SavedGame[]>("/api/games"),
   });
 }
 
 export function useSaveGame() {
-  const { user } = useAuth();
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (input: CreateGameInput) =>
-      api<Game>("/api/games", { method: "POST", body: input }),
+      api<SavedGame>("/api/games", { method: "POST", body: input }),
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ["games", user?.id] });
+      void queryClient.invalidateQueries({ queryKey: GAMES_KEY });
     },
   });
 }

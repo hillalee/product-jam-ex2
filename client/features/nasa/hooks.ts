@@ -1,26 +1,24 @@
 import type { Explanation, Picture } from "@shared/schemas/nasa";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { api } from "../../lib/api";
-import { useAuth } from "../../lib/auth";
 
 export function usePictures() {
-  const { user } = useAuth();
   return useQuery({
-    queryKey: ["nasa", "pictures", user?.id],
-    queryFn: ({ signal }) =>
-      api<Picture[]>("/api/nasa/pictures?count=6", { signal }),
-    staleTime: Infinity,
-    retry: false,
+    queryKey: ["nasa-pictures"],
+    queryFn: () => api<Picture[]>("/api/nasa/pictures"),
   });
 }
 
-export function useExplanation() {
+/**
+ * Asks the server to explain a picture.
+ * Takes a date, returns the explanation.
+ */
+export function useExplainPicture() {
   return useMutation({
     mutationFn: (date: string) =>
       api<Explanation>("/api/nasa/explanations", {
         method: "POST",
         body: { date },
       }),
-    retry: false,
   });
 }

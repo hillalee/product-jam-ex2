@@ -1,129 +1,93 @@
-import { pictureSchema, apodDateSchema } from "@shared/schemas/nasa";
 import type { Picture } from "@shared/schemas/nasa";
 import { z } from "zod";
-import { ProviderError, providerJson } from "./providers";
 
-const sourceSchema = z.object({
-  date: apodDateSchema,
+const APOD_API_URL = "https://api.nasa.gov/planetary/apod";
+
+const SCIENCE_APOD_URL = "https://science.nasa.gov/wp-json/wp/v2/apod-basic";
+
+const TIMEOUT_MS = 45_000;
+
+const randomDatesSchema = z.array(z.object({ date: z.string() }));
+
+const sciencePictureSchema = z.object({
+  date: z.string(),
   title: z.string(),
   explanation: z.string(),
   media_type: z.string(),
-  url: z.string(),
   hdurl: z.string().optional(),
-  copyright: z.string().optional(),
 });
 
-function isPlaceholder(url: string) {
-  return /nasa[-_]logo|\/misc\/news-thumbnail\./i.test(url);
+/**
+ * Gets random pictures from NASA.
+ * Takes the API key and a count, returns the pictures or null.
+ */
+export async function getRandomPictures(
+  apiKey: string,
+  count: number,
+): Promise<Picture[] | null> {
+  const url = `${APOD_API_URL}?api_key=${apiKey}&count=${count}`;
+  const dates = randomDatesSchema.safeParse(await fetchJson(url));
+  if (!dates.success) {
+    return null;
+  }
+
+  const pictures = await Promise.all(
+    dates.data.map((item) => getPicture(item.date)),
+  );
+  return pictures.filter((picture) => picture !== null);
 }
 
-function plainText(text: string) {
+/**
+ * Gets one picture from NASA's science site.
+ * Takes a date (YYYY-MM-DD), returns the picture or null.
+ */
+export async function getPicture(date: string): Promise<Picture | null> {
+  const dayCode = date.slice(2).replaceAll("-", "");
+  const picture = sciencePictureSchema.safeParse(
+    await fetchJson(`${SCIENCE_APOD_URL}/${dayCode}`),
+  );
+
+  if (!picture.success || picture.data.media_type !== "image") {
+    return null;
+  }
+  const imageUrl = picture.data.hdurl;
+  if (!imageUrl || imageUrl.includes("news-thumbnail")) {
+    return null;
+  }
+
+  return {
+    date: picture.data.date,
+    title: picture.data.title,
+    explanation: removeHtml(picture.data.explanation),
+    image_url: imageUrl,
+  };
+}
+
+/**
+ * Removes HTML and the "Explanation:" prefix.
+ * Takes NASA's text, returns plain text.
+ */
+function removeHtml(text: string): string {
   return text
-    .replace(/<[^>]*>/g, " ")
-    .replace(
-      /&(?:amp|quot|apos|lt|gt|nbsp);/g,
-      (entity) =>
-        ({
-          "&amp;": "&",
-          "&quot;": '"',
-          "&apos;": "'",
-          "&lt;": "<",
-          "&gt;": ">",
-          "&nbsp;": " ",
-        })[entity] ?? entity,
-    )
-    .replace(/\s+/g, " ")
+    .replace(/<[^>]*>/g, "")
+    .replace("Explanation:", "")
     .trim();
 }
 
-export async function getPictures(
-  key: string,
-  query: { count: number } | { date: string },
-): Promise<Picture[]> {
-  if (!key)
-    throw new ProviderError(
-      503,
-      "not_configured",
-      "NASA pictures are not configured yet.",
-    );
-  const signal = AbortSignal.timeout(30_000);
-  const url = new URL("https://api.nasa.gov/planetary/apod");
-  url.searchParams.set("api_key", key);
-  for (const [name, value] of Object.entries(query))
-    url.searchParams.set(name, String(value));
-  const payload = await providerJson(url, "NASA", { signal });
-  const parsed = z
-    .array(sourceSchema)
-    .safeParse(Array.isArray(payload) ? payload : [payload]);
-  if (!parsed.success)
-    throw new ProviderError(
-      502,
-      "invalid_nasa_data",
-      "NASA returned picture data we could not read.",
-    );
-
-  const resolved = await Promise.allSettled(
-    parsed.data.map(async (source) => {
-      if (!isPlaceholder(source.url) && !isPlaceholder(source.hdurl ?? ""))
-        return source;
-      const dateCode = source.date.replaceAll("-", "").slice(2);
-      const replacement = sourceSchema.safeParse(
-        await providerJson(
-          `https://science.nasa.gov/wp-json/wp/v2/apod-basic/${dateCode}`,
-          "NASA",
-          { signal },
-        ),
-      );
-      if (!replacement.success || replacement.data.date !== source.date)
-        throw new ProviderError(
-          502,
-          "invalid_nasa_data",
-          "NASA could not return the requested picture.",
-        );
-      return replacement.data;
-    }),
-  );
-  const sources = resolved.flatMap((entry) =>
-    entry.status === "fulfilled" ? [entry.value] : [],
-  );
-  const failed = resolved.find((entry) => entry.status === "rejected");
-  if (
-    failed?.status === "rejected" &&
-    ("date" in query || sources.length === 0)
-  )
-    throw failed.reason;
-  const pictures: Picture[] = [];
-  for (const source of sources) {
-    if (source.media_type !== "image") continue;
-    const imageUrl = source.hdurl || source.url;
-    if (
-      isPlaceholder(imageUrl) ||
-      (imageUrl === source.url &&
-        source.url.includes("science.nasa.gov/image-article/"))
-    )
-      continue;
-    const picture = pictureSchema.safeParse({
-      date: source.date,
-      title: plainText(source.title),
-      explanation: plainText(source.explanation),
-      image_url: imageUrl,
-      ...(source.copyright ? { copyright: plainText(source.copyright) } : {}),
+/**
+ * Fetches JSON, giving up after TIMEOUT_MS.
+ * Takes a URL, returns the JSON or null.
+ */
+async function fetchJson(url: string): Promise<unknown> {
+  try {
+    const response = await fetch(url, {
+      signal: AbortSignal.timeout(TIMEOUT_MS),
     });
-    if (
-      picture.success &&
-      !pictures.some((item) => item.date === picture.data.date)
-    )
-      pictures.push(picture.data);
+    if (!response.ok) {
+      return null;
+    }
+    return await response.json();
+  } catch {
+    return null;
   }
-  if (
-    "date" in query &&
-    (!pictures.length || pictures[0].date !== query.date)
-  ) {
-    throw new ProviderError(
-      400,
-      "not_a_picture",
-      "This date does not have a usable APOD image.",
-    );
-  }
-  return "count" in query ? pictures.slice(0, query.count) : pictures;
 }

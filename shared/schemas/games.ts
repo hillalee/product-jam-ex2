@@ -1,17 +1,16 @@
 import { z } from "zod";
 
-export const createGameSchema = z.strictObject({
-  moves: z
-    .array(z.number().int().min(0).max(15))
-    .min(5, "A completed game needs at least five moves.")
-    .max(16),
-});
-
-export const gameSchema = createGameSchema.extend({
-  id: z.uuid(),
+/** A saved game, as the API returns it. */
+export const savedGameSchema = z.object({
+  id: z.string(),
   result: z.enum(["X", "O", "draw"]),
-  created_at: z.iso.datetime({ offset: true }),
+  created_at: z.string(),
 });
 
-export type Game = z.infer<typeof gameSchema>;
+/** What the page sends to save a game. */
+export const createGameSchema = z.object({
+  moves: z.array(z.number()),
+});
+
+export type SavedGame = z.infer<typeof savedGameSchema>;
 export type CreateGameInput = z.infer<typeof createGameSchema>;

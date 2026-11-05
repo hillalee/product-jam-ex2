@@ -5,11 +5,24 @@ import { useAuth } from "../lib/auth";
 import {
   APP_NAME,
   COURSE_CREDITS,
-  GITHUB_URL,
+  COURSE_GITHUB,
   SHOW_DEMOS,
 } from "../lib/config";
 import styles from "./Layout.module.css";
 
+/**
+ * The frame around every page: the bar at the top, the footer at the
+ * bottom, and the current page in between. Change the links and the footer
+ * freely - this is your app's, not part of the design system.
+ *
+ * Applied in client/App.tsx. Pages nested inside
+ * <Route element={<Layout />}> get this header and footer, drawn where
+ * <Outlet /> is. Pages that fill the whole screen on their own (like sign
+ * in) are simply not nested inside it.
+ *
+ * React Router calls this a "layout route":
+ * https://reactrouter.com/start/declarative/routing#layout-routes
+ */
 export function Layout() {
   return (
     <div className={styles.shell}>
@@ -19,9 +32,7 @@ export function Layout() {
         </Link>
         <nav className={styles.nav}>
           <Link to="/">Home</Link>
-          <Link to="/tic-tac-toe">Tic-tac-toe</Link>
-          <Link to="/nasa">Space pictures</Link>
-          <a href={GITHUB_URL} target="_blank" rel="noreferrer">
+          <a href={COURSE_GITHUB} target="_blank" rel="noreferrer">
             GitHub
           </a>
           {SHOW_DEMOS ? <Link to="/demos">Demos</Link> : null}
@@ -29,6 +40,7 @@ export function Layout() {
       </header>
 
       <div className={styles.content}>
+        {/* Shows a spinner while the page downloads, under the header. */}
         <Suspense
           fallback={
             <main>
@@ -41,6 +53,7 @@ export function Layout() {
       </div>
 
       <footer className={styles.footer}>
+        <p>This is some example footer content.</p>
         <p>
           <AuthAction /> | {COURSE_CREDITS}
         </p>
@@ -49,6 +62,7 @@ export function Layout() {
   );
 }
 
+/** "hey, you" and a way out - or a way in, if nobody is logged in. */
 function AuthAction() {
   const { user, loading, signOut } = useAuth();
 
@@ -57,7 +71,7 @@ function AuthAction() {
 
   return (
     <>
-      {user.email} :){" "}
+      hey {user.email} :){" "}
       <button
         type="button"
         className={styles.linkButton}

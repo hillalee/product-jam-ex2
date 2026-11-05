@@ -109,21 +109,21 @@ the text from NASA and checks the output before saving it.
 
 ## What changed and why
 
-NASA's updated gateway returned its generic logo for real APOD dates, so I use
-NASA's [documented dated feed](https://api.nasa.gov/assets/files/apod/APOD-APIs-and-RSS-info.pdf)
-when that happens. I still get the random dates from the assignment's endpoint
-and check the requested date against the replacement. The new feed includes
-HTML and uses `hdurl` for the image, so I extract plain text and display the
-image URL rather than rendering its HTML. Missing migrated entries are skipped
-in random batches, so one missing date does not discard the available pictures.
+My first version followed this design closely and was much bigger than the
+assignment needs, so I simplified it.
 
-The random-count request was too slow for a full batch, so the page asks for
-six pictures and NASA has 30 seconds instead of 10. The API still accepts a
-count up to 20. Gemini uses `gemini-3.8-flash`, with the same 30-second timeout
-as planned.
+In `apod_explanations` I dropped the `pending`, `ready` and `failed` status and
+its check constraint, so a row only holds a saved answer. The server returns the
+saved row if there is one, and otherwise asks NASA and Gemini and saves the
+answer. Two users asking for the same new picture at the same moment could make
+Gemini answer twice, which I accepted because it is rare and cheap. Without the
+status there are no `409` answers, and any NASA or Gemini failure is a `502`.
+The new table is in `20261104203000_simplify_apod_explanations.sql`.
 
+`api.nasa.gov` now answers every date with the NASA logo instead of the real
+picture, so I take random dates from it and get each picture and its explanation
+from `science.nasa.gov`. The API is also slow, so the page shows 10 pictures
+instead of 20, and the server waits up to 45 seconds.
 
-A phone screenshot showed that the replacement feed can also return a generic
-NASA thumbnail. I now reject those replacement URLs as well. The page loads its
-six images immediately and shows the kit's Spinner until each image finishes,
-with a message if it fails, so the user does not see unexplained empty space.
+I also removed the five-move minimum from the games schema, because the replay
+already rejects unfinished games with `400`.

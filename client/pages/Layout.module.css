@@ -1,3 +1,4 @@
+/* Header on top, footer at the bottom of the screen even on a short page. */
 .shell {
   display: flex;
   flex-direction: column;
@@ -35,7 +36,6 @@
 
 .nav {
   display: flex;
-  flex-wrap: wrap;
   gap: var(--space-4);
 }
 
@@ -49,6 +49,7 @@
   margin-block-start: var(--space-2);
 }
 
+/* A button that looks like the links around it. */
 .linkButton {
   padding: 0;
   border: 0;
@@ -69,6 +70,7 @@
   outline-offset: var(--focus-ring-offset);
 }
 
+/* The accent would vanish against the dark header bar. */
 .header a:focus-visible {
   outline-color: var(--color-header-text);
 }
