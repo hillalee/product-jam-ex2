@@ -1,15 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Rubik:wght@400;500&display=swap");
-
-@font-face {
-  font-family: "Lava Pro HL";
-  src:
-    local("Lava Pro_HL Regular Italic"),
-    local("LavaPro_HL-RegularItalic"),
-    url("/fonts/lava-pro-hl-regular-italic.otf") format("opentype");
-  font-style: italic;
-  font-weight: 400;
-  font-display: swap;
-}
+@import url("https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@400&family=Rubik:wght@400;500&display=swap");
 
 .page {
   --rose: #d11f43;
@@ -36,7 +25,7 @@
   justify-content: space-between;
   padding-block-end: 8px;
   border-block-end: 2px solid #000;
-  font-family: "Lava Pro HL", serif;
+  font-family: "Frank Ruhl Libre", serif;
   font-size: 23px;
   font-style: italic;
 }
@@ -86,7 +75,7 @@
 .sectionTitle,
 .statement {
   margin: 0;
-  font-family: "Lava Pro HL", serif;
+  font-family: "Frank Ruhl Libre", serif;
   font-style: italic;
   font-weight: 400;
   line-height: normal;
@@ -247,6 +236,34 @@
 }
 
 @media (min-width: 1024px) {
+  .page {
+    font-size: 18px;
+  }
+
+  .heroTitle {
+    font-size: 52px;
+  }
+
+  .sectionTitle,
+  .statement {
+    font-size: 34px;
+  }
+
+  .page .role {
+    font-size: 22px;
+  }
+
+  .itemTitle,
+  .pillButton,
+  .menu a,
+  .menuOpen a {
+    font-size: 18px;
+  }
+
+  .smallText {
+    font-size: 16px;
+  }
+
   .content {
     max-inline-size: 110ch;
   }
@@ -274,31 +291,31 @@
 
 @media (min-width: 1280px) {
   .page {
-    font-size: 18px;
+    font-size: 20px;
   }
 
   .heroTitle {
-    font-size: 52px;
+    font-size: 58px;
   }
 
   .sectionTitle,
   .statement {
-    font-size: 34px;
+    font-size: 38px;
   }
 
   .page .role {
-    font-size: 22px;
+    font-size: 24px;
   }
 
   .itemTitle,
   .pillButton,
   .menu a,
   .menuOpen a {
-    font-size: 18px;
+    font-size: 20px;
   }
 
   .smallText {
-    font-size: 16px;
+    font-size: 17px;
   }
 }
 

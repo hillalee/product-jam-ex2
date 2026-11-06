@@ -161,8 +161,15 @@ was wrong or insecure. How did you notice, and what did you change?
 
 **Answer:**
 
-The AI added `.min(5)` to `createGameSchema`, so the schema rejected my 2-move
-game before the server replayed it. I noticed it in question 3, when the server
-answered `invalid_input` instead of a rules error, so I couldn't tell whether
-the replay catches fake games. I removed the rule, and now every game goes
-through `replayGame`, which answers `game_not_over`.
+When we made the design page, from a certain width the text stopped getting
+bigger, so on a laptop it was small and hard to read. We noticed it when the
+designer and I played around with the window width to check the responsiveness.
+We added more breakpoints, so the text and the menu keep growing on wider
+screens, like on the
+[Tel Aviv Museum page](https://www.tamuseum.org.il/he/about/) that we used as a
+reference.
+
+The AI also got the RTL order wrong in the phone menu bar. It put the logo first
+so it would be on the left, but in RTL the first item is on the right, so the
+menu button ended up on the left. I saw it on the phone view and swapped the
+order, so now the button is on the right and the logo on the left.
