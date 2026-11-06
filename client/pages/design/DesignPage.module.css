@@ -2,7 +2,10 @@
 
 @font-face {
   font-family: "Lava Pro HL";
-  src: url("/fonts/lava-pro-hl-regular-italic.otf") format("opentype");
+  src:
+    local("Lava Pro_HL Regular Italic"),
+    local("LavaPro_HL-RegularItalic"),
+    url("/fonts/lava-pro-hl-regular-italic.otf") format("opentype");
   font-style: italic;
   font-weight: 400;
   font-display: swap;
@@ -288,11 +291,74 @@
   }
 
   .itemTitle,
-  .pillButton {
+  .pillButton,
+  .menu a,
+  .menuOpen a {
     font-size: 18px;
   }
 
   .smallText {
     font-size: 16px;
+  }
+}
+
+@media (min-width: 1600px) {
+  .page {
+    grid-template-columns: 280px 1fr;
+    font-size: 22px;
+  }
+
+  .heroTitle {
+    font-size: 64px;
+  }
+
+  .sectionTitle,
+  .statement {
+    font-size: 42px;
+  }
+
+  .page .role {
+    font-size: 26px;
+  }
+
+  .itemTitle,
+  .pillButton,
+  .menu a,
+  .menuOpen a {
+    font-size: 22px;
+  }
+
+  .smallText {
+    font-size: 19px;
+  }
+}
+
+@media (min-width: 1920px) {
+  .page {
+    font-size: 26px;
+  }
+
+  .heroTitle {
+    font-size: 76px;
+  }
+
+  .sectionTitle,
+  .statement {
+    font-size: 50px;
+  }
+
+  .page .role {
+    font-size: 30px;
+  }
+
+  .itemTitle,
+  .pillButton,
+  .menu a,
+  .menuOpen a {
+    font-size: 25px;
+  }
+
+  .smallText {
+    font-size: 22px;
   }
 }
