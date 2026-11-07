@@ -1,5 +1,5 @@
 # Product Jam Starter Kit
-
+Designed by ghadeer 
 The starting point for Product Jam projects. It is a web app you can log into,
 that stores data in a database and runs on the internet for free.
 
