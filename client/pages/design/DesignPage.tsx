@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 import styles from "./DesignPage.module.css";
 
 const TEAM = [
@@ -55,9 +55,25 @@ const PHOTOS = [
 
 export default function DesignPage() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [footerHeight, setFooterHeight] = useState(0);
+
+  useEffect(() => {
+    const footer = document.querySelector("footer");
+    if (!footer) return;
+    const observer = new ResizeObserver(() =>
+      setFooterHeight(footer.offsetHeight),
+    );
+    observer.observe(footer);
+    return () => observer.disconnect();
+  }, []);
 
   return (
-    <main className={styles.page} lang="he" dir="rtl">
+    <main
+      className={styles.page}
+      lang="he"
+      dir="rtl"
+      style={{ "--footer-height": `${footerHeight}px` } as CSSProperties}
+    >
       <div className={styles.menuBar}>
         <button
           type="button"

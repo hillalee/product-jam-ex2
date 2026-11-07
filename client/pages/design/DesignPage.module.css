@@ -4,15 +4,26 @@
   --rose: #d11f43;
   --rose-light: #ffe4ea;
   --gray-text: #595959;
+  --padding-end: 54px;
 
   display: grid;
   max-inline-size: none;
-  padding: 24px 28px 54px;
+  padding: 24px 28px var(--padding-end);
   color: #000;
   background: #fff;
   font-family: "Rubik", sans-serif;
-  font-size: 12px;
+  font-size: clamp(12px, 8.6px + 0.91vw, 26px);
   line-height: normal;
+}
+
+:global(html):has(.page) {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :global(html):has(.page) {
+    scroll-behavior: auto;
+  }
 }
 
 .page p {
@@ -53,7 +64,7 @@
 .menu a,
 .menuOpen a {
   color: #000;
-  font-size: 15px;
+  font-size: clamp(15px, 12.57px + 0.65vw, 25px);
   font-weight: 500;
   text-decoration: none;
 }
@@ -69,6 +80,14 @@
   display: grid;
   gap: 13px;
   padding: 10px 6px;
+  scroll-margin-block-start: 24px;
+}
+
+.section:last-child {
+  min-block-size: calc(
+    100dvh - 24px - var(--padding-end) - var(--footer-height, 0px)
+  );
+  align-content: start;
 }
 
 .heroTitle,
@@ -82,12 +101,12 @@
 }
 
 .heroTitle {
-  font-size: 28px;
+  font-size: clamp(28px, 16.35px + 3.11vw, 76px);
 }
 
 .sectionTitle,
 .statement {
-  font-size: 23px;
+  font-size: clamp(23px, 16.45px + 1.75vw, 50px);
 }
 
 .pillButton {
@@ -99,7 +118,7 @@
   background: #fff;
   color: var(--rose);
   font: inherit;
-  font-size: 13px;
+  font-size: clamp(13px, 10.09px + 0.78vw, 25px);
   font-weight: 500;
   text-decoration: none;
   cursor: pointer;
@@ -123,17 +142,17 @@
 
 .page .role {
   margin-block-end: 8px;
-  font-size: 15px;
+  font-size: clamp(15px, 11.36px + 0.97vw, 30px);
 }
 
 .itemTitle {
-  font-size: 13px;
+  font-size: clamp(13px, 10.09px + 0.78vw, 25px);
   font-weight: 500;
 }
 
 .smallText {
   color: var(--gray-text);
-  font-size: 10px;
+  font-size: clamp(10px, 8.33px + 0.71vw, 22px);
 }
 
 .backgroundItem {
@@ -175,43 +194,13 @@
   object-fit: cover;
 }
 
-@media (min-width: 480px) {
-  .page {
-    font-size: 15px;
-  }
-
-  .heroTitle {
-    font-size: 40px;
-  }
-
-  .sectionTitle,
-  .statement {
-    font-size: 28px;
-  }
-
-  .page .role {
-    font-size: 18px;
-  }
-
-  .itemTitle {
-    font-size: 16px;
-  }
-
-  .smallText {
-    font-size: 13px;
-  }
-
-  .pillButton {
-    font-size: 15px;
-  }
-}
-
 @media (min-width: 768px) {
   .page {
     grid-template-columns: 220px 1fr;
     align-items: start;
     column-gap: 64px;
-    padding: 80px 48px;
+    --padding-end: 80px;
+    padding: 80px 48px var(--padding-end);
   }
 
   .menuBar {
@@ -230,40 +219,12 @@
   }
 
   .content {
-    gap: 96px;
+    gap: 64px;
     margin-block-start: 0;
   }
 }
 
 @media (min-width: 1024px) {
-  .page {
-    font-size: 18px;
-  }
-
-  .heroTitle {
-    font-size: 52px;
-  }
-
-  .sectionTitle,
-  .statement {
-    font-size: 34px;
-  }
-
-  .page .role {
-    font-size: 22px;
-  }
-
-  .itemTitle,
-  .pillButton,
-  .menu a,
-  .menuOpen a {
-    font-size: 18px;
-  }
-
-  .smallText {
-    font-size: 16px;
-  }
-
   .content {
     max-inline-size: 110ch;
   }
@@ -289,93 +250,8 @@
   }
 }
 
-@media (min-width: 1280px) {
-  .page {
-    font-size: 20px;
-  }
-
-  .heroTitle {
-    font-size: 58px;
-  }
-
-  .sectionTitle,
-  .statement {
-    font-size: 38px;
-  }
-
-  .page .role {
-    font-size: 24px;
-  }
-
-  .itemTitle,
-  .pillButton,
-  .menu a,
-  .menuOpen a {
-    font-size: 20px;
-  }
-
-  .smallText {
-    font-size: 17px;
-  }
-}
-
 @media (min-width: 1600px) {
   .page {
     grid-template-columns: 280px 1fr;
-    font-size: 22px;
-  }
-
-  .heroTitle {
-    font-size: 64px;
-  }
-
-  .sectionTitle,
-  .statement {
-    font-size: 42px;
-  }
-
-  .page .role {
-    font-size: 26px;
-  }
-
-  .itemTitle,
-  .pillButton,
-  .menu a,
-  .menuOpen a {
-    font-size: 22px;
-  }
-
-  .smallText {
-    font-size: 19px;
-  }
-}
-
-@media (min-width: 1920px) {
-  .page {
-    font-size: 26px;
-  }
-
-  .heroTitle {
-    font-size: 76px;
-  }
-
-  .sectionTitle,
-  .statement {
-    font-size: 50px;
-  }
-
-  .page .role {
-    font-size: 30px;
-  }
-
-  .itemTitle,
-  .pillButton,
-  .menu a,
-  .menuOpen a {
-    font-size: 25px;
-  }
-
-  .smallText {
-    font-size: 22px;
   }
 }
