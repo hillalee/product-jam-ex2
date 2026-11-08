@@ -6,12 +6,12 @@ import { explainInHebrew } from "../lib/gemini";
 import { getPicture, getRandomPictures } from "../lib/nasa";
 import { createAdminClient } from "../lib/supabase";
 
-const PICTURE_COUNT = 10;
+const PICTURE_COUNT = 20;
 const COLUMNS = "date, title_he, summary_he, tags";
 
 export const nasa = new Hono<AppEnv>()
   .get("/pictures", async (c) => {
-    const pictures = await getRandomPictures(c.env.NASA_API_KEY, PICTURE_COUNT);
+    const pictures = await getRandomPictures(PICTURE_COUNT);
     if (pictures === null) {
       return fail(
         c,

@@ -125,6 +125,9 @@ browser that the user isn't allowed to do something, which isn't true. `502`
 means a server I depend on failed, which is what happened. I put the right key
 back afterwards.
 
+(This was written before NASA's endpoint change, which no longer needs an API
+key.)
+
 [Page error and Network response](screenshots/nasa-failure-network.jpg).
 
 ## 6. Who wrote the text?

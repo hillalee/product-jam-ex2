@@ -77,8 +77,8 @@ server.
   `{ date, title, image_url, explanation, copyright? }` from NASA. Only images
   with usable HTTPS URLs are included, without repeated dates, so the result may
   contain fewer pictures.
-- Errors: `400` for an invalid count; `502` if NASA fails or returns invalid
-  data; `504` after 10 seconds; `503` if the API key is missing.
+- Errors: `400` for an invalid count; `502` if NASA fails, doesn't answer within
+  15 seconds or returns invalid data.
 - No tables used.
 
 ### `POST /api/nasa/explanations`
@@ -120,10 +120,10 @@ Gemini answer twice, which I accepted because it is rare and cheap. Without the
 status there are no `409` answers, and any NASA or Gemini failure is a `502`.
 The new table is in `20261104203000_simplify_apod_explanations.sql`.
 
-`api.nasa.gov` now answers every date with the NASA logo instead of the real
-picture, so I take random dates from it and get each picture and its explanation
-from `science.nasa.gov`. The API is also slow, so the page shows 10 pictures
-instead of 20, and the server waits up to 45 seconds.
+`api.nasa.gov/planetary/apod` stopped working in September, so the server now
+uses only NASA's new `science.nasa.gov/wp-json/wp/v2/apod-basic` endpoint. It
+needs no API key, so I removed `NASA_API_KEY`. The page shows 20 pictures again
+and the server waits up to 15 seconds instead of 45.
 
 I also removed the five-move minimum from the games schema, because the replay
 already rejects unfinished games with `400`.

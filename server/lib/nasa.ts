@@ -1,15 +1,11 @@
 import type { Picture } from "@shared/schemas/nasa";
 import { z } from "zod";
 
-const APOD_API_URL = "https://api.nasa.gov/planetary/apod";
+const APOD_URL = "https://science.nasa.gov/wp-json/wp/v2/apod-basic";
 
-const SCIENCE_APOD_URL = "https://science.nasa.gov/wp-json/wp/v2/apod-basic";
+const TIMEOUT_MS = 15_000;
 
-const TIMEOUT_MS = 45_000;
-
-const randomDatesSchema = z.array(z.object({ date: z.string() }));
-
-const sciencePictureSchema = z.object({
+const pictureSchema = z.object({
   date: z.string(),
   title: z.string(),
   explanation: z.string(),
@@ -19,34 +15,47 @@ const sciencePictureSchema = z.object({
 
 /**
  * Gets random pictures from NASA.
- * Takes the API key and a count, returns the pictures or null.
+ * Takes a count, returns the pictures or null.
  */
 export async function getRandomPictures(
-  apiKey: string,
   count: number,
 ): Promise<Picture[] | null> {
-  const url = `${APOD_API_URL}?api_key=${apiKey}&count=${count}`;
-  const dates = randomDatesSchema.safeParse(await fetchJson(url));
-  if (!dates.success) {
+  const probe = await fetchNasa(`${APOD_URL}?per_page=1`);
+  const total = Number(probe?.headers.get("X-WP-Total"));
+  if (!Number.isInteger(total) || total < count) {
     return null;
   }
 
-  const pictures = await Promise.all(
-    dates.data.map((item) => getPicture(item.date)),
+  const page = 1 + Math.floor(Math.random() * Math.floor(total / count));
+  const response = await fetchNasa(
+    `${APOD_URL}?per_page=${count}&page=${page}`,
   );
-  return pictures.filter((picture) => picture !== null);
+  const items = z.array(z.unknown()).safeParse(await readJson(response));
+  if (!items.success) {
+    return null;
+  }
+
+  return items.data
+    .map((item) => toPicture(item))
+    .filter((picture) => picture !== null);
 }
 
 /**
- * Gets one picture from NASA's science site.
+ * Gets one picture from NASA.
  * Takes a date (YYYY-MM-DD), returns the picture or null.
  */
 export async function getPicture(date: string): Promise<Picture | null> {
   const dayCode = date.slice(2).replaceAll("-", "");
-  const picture = sciencePictureSchema.safeParse(
-    await fetchJson(`${SCIENCE_APOD_URL}/${dayCode}`),
-  );
+  const response = await fetchNasa(`${APOD_URL}/${dayCode}`);
+  return toPicture(await readJson(response));
+}
 
+/**
+ * Turns one NASA item into a picture.
+ * Takes the item, returns the picture, or null if it is not a real image.
+ */
+function toPicture(item: unknown): Picture | null {
+  const picture = pictureSchema.safeParse(item);
   if (!picture.success || picture.data.media_type !== "image") {
     return null;
   }
@@ -75,18 +84,27 @@ function removeHtml(text: string): string {
 }
 
 /**
- * Fetches JSON, giving up after TIMEOUT_MS.
- * Takes a URL, returns the JSON or null.
+ * Fetches a URL, giving up after TIMEOUT_MS.
+ * Takes a URL, returns the response or null if it failed.
  */
-async function fetchJson(url: string): Promise<unknown> {
+async function fetchNasa(url: string): Promise<Response | null> {
   try {
     const response = await fetch(url, {
       signal: AbortSignal.timeout(TIMEOUT_MS),
     });
-    if (!response.ok) {
-      return null;
-    }
-    return await response.json();
+    return response.ok ? response : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Reads a response as JSON.
+ * Takes a response or null, returns the JSON or null.
+ */
+async function readJson(response: Response | null): Promise<unknown> {
+  try {
+    return response ? await response.json() : null;
   } catch {
     return null;
   }
